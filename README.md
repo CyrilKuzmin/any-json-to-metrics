@@ -4,6 +4,7 @@ This simple exporter parses any (I hope) JSON endpoints. This is only prototype 
 ## Usage
 All options should be set in 'exporter.json' file. There are only few options:
 | Option | Type | Comment |
+| ------ | ---- | ------- |
 | bind_address | string | Interface address (default: "0.0.0.0") |
 | port | int | TCP port (default: "9900") |
 | prefix | string | (optional, default: "anyjson_") You can specify a prefix for all exporter's metrics (Prometheus "\_\_name\_\_") |
