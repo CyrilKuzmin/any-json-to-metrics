@@ -1,2 +1,2 @@
-#any-json-to-metrics exporter
+# any-json-to-metrics exporter
 The most useless exporter in our world, but...
