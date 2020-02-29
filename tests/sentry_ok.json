@@ -1,0 +1,8 @@
+{
+    "healthy": {
+        "WarningStatusCheck": true,
+        "CeleryAppVersionCheck": true,
+        "CeleryAliveCheck": true
+    },
+    "problems": [ ]
+}

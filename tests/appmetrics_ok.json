@@ -1,0 +1,10 @@
+{
+    "healthy": {
+        "admin-api": "OK. 'http://admin-api/health' success. Total Time taken: 123ms. Attempts: 1.",
+        "db_check": "Ok",
+        "service-one": "OK. 'http://service-one/health' success. Total Time taken: 26ms. Attempts: 1.",
+        "service-two": "OK. 'http://service-two/health' success. Total Time taken: 1ms. Attempts: 1.",
+        "service-scheduler": "OK. 'http://scheduler/health' success. Total Time taken: 2ms. Attempts: 1."
+    },
+    "status": "Healthy"
+}

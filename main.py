@@ -43,11 +43,17 @@ class JsonCollector(object):
             result["labels"].update(label)
         return result
 
+    def correctMetricName(self, s: str) -> str:
+        return str(s).replace(' ', '_').replace('-','_')
+
     def parse(self, t: tuple, metrics: list, endpoint, label={}) -> list:
         NoneType = type(None)
         if type(t[1]) in (int, float, bool, str, NoneType):
             mtr_d = {}
-            k = str(t[0]+'_value').replace(' ', '_')
+            if self._show_type:
+                k = self.correctMetricName(t[0]+'_value')
+            else:
+                k = self.correctMetricName(t[0])
             v = t[1]
             mtr_d = self.parseBaseTuple((k, v), endpoint, label=label)
             metric = Metric(mtr_d['name'], '', 'gauge')
@@ -55,10 +61,11 @@ class JsonCollector(object):
             metrics.append(metric)
         if type(t[1]) == list:
             for i in t[1]:
+                l = {"index": str(t[1].index(i))}
                 name = t[0]
                 if self._show_type:
                     name += '_list'
-                self.parse((name, i), metrics, endpoint)
+                self.parse((name, i), metrics, endpoint, label=l)
         if type(t[1]) == dict:
             for i in t[1].items():
                 name = t[0]
@@ -71,12 +78,21 @@ class JsonCollector(object):
     def collect(self):
         for endpoint in self._endpoints:
             # Получаем JSON
-            response = requests.get(endpoint)
+            data = {}
             metrics = []
-            metric = Metric('responsecode', '', 'gauge')
-            metric.add_sample(self._prefix + 'responsecode', value=response.status_code, labels={"url": endpoint})
-            metrics.append(metric)
-            data = response.json()
+            try:
+                response = requests.get(endpoint)
+                metric = Metric('responsecode', '', 'gauge')
+                metric.add_sample(self._prefix + 'responsecode', value=response.status_code, labels={"url": endpoint})
+                metrics.append(metric)
+                metric = Metric('scrape_success', '', 'gauge')
+                metric.add_sample(self._prefix + 'scrape_success', value=1, labels={"url": endpoint})
+                metrics.append(metric)
+                data = response.json()
+            except:
+                metric = Metric('scrape_success', '', 'gauge')
+                metric.add_sample(self._prefix + 'scrape_success', value=0, labels={"url": endpoint})
+                metrics.append(metric)
             # тут может быть dict или list
             if type(data) == dict:
                 for i in data.items():
