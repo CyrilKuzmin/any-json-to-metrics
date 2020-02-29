@@ -1,0 +1,16 @@
+{
+    "bind_address": "0.0.0.0",
+    "port": 9900,
+    "prefix": "anyjson_",
+    "data_types_in_name": false,
+    "endpoints": [
+        "http://localhost:5000/simple.json",
+        "http://localhost:5000/sentry_bad.json"
+    ],
+    "healthy_regex": [
+        "[Hh]ealth.*",
+        "[Tt]rue",
+        "[Oo][Kk]",
+        "1"
+    ]
+}

@@ -1,0 +1,4 @@
+flask
+prometheus_client
+requests
+werkzeug
