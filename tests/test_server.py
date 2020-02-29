@@ -3,7 +3,7 @@ from flask import Response
 import json 
 import os
 
-app = Flask(__name__)
+app = Flask(__name__,)
 
 @app.route('/<name>')
 def hello_name(name):
@@ -26,4 +26,4 @@ if __name__ == '__main__':
     --------------------------------------
     Paste it in you 'exporter.json' config file
     ''')
-    app.run()
+    app.run(host="0.0.0.0")
