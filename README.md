@@ -1,5 +1,15 @@
 # any-json-to-metrics exporter
-The most useless exporter in our world, but...
+This simple exporter parses any (I hope) JSON endpoints. This is only prototype for test environments.
+
+## Usage
+All options should be set in 'exporter.json' file. There are only few options:
+| Option | Type | Comment |
+| bind_address | string | Interface address (default: "0.0.0.0") |
+| port | int | TCP port (default: "9900") |
+| prefix | string | (optional, default: "anyjson_") You can specify a prefix for all exporter's metrics (Prometheus "\_\_name\_\_") |
+| data_types_in_name | bool | (optional, default: false) If "true" you will get types of elements in "\_\_name\_\_" | 
+| endpoints | list of strings | Set all your endpoints |
+| healthy_regex | list of strings | (optional) By default if the value of some JSON element is string, its metrics value will be 0. You can set regex to check these strings and value will set to 1 if string matches at least one regex. Compare anyjson_f and anyjson_f_state in the 1st example below. | 
 
 ## Examples
 Input:
