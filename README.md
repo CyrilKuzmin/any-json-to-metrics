@@ -12,6 +12,16 @@ All options should be set in 'exporter.json' file. There are only few options:
 | endpoints | list of strings | Set all your endpoints |
 | healthy_regex | list of strings | (optional) By default if the value of some JSON element is string, its metrics value will be 0. You can set regex to check these strings and value will set to 1 if string matches at least one regex. Compare anyjson_f and anyjson_f_state in the 1st example below. | 
 
+Then just run it:
+```
+python exporter.py
+```
+or use Docker:
+```
+docker build -t any-json-to-metrics .
+docker run -d -p 9900:9900 -v /path/to/exporter.json:/app/exporter.json any-json-to-metrics
+```
+
 ## Examples
 Input:
 ```
