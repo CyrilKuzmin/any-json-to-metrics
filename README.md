@@ -1,5 +1,5 @@
 # any-json-to-metrics Prometheus exporter
-This simple exporter parses any (I hope) JSON endpoints. This is only prototype for test environments.
+This simple exporter parses any (I hope) JSON endpoints.
 
 ## Usage
 All options should be set in 'exporter.json' file. There are only few options:
