@@ -22,7 +22,7 @@ if __name__ == '__main__':
     Test server for any-json-to-metrics exporter
     I've found these JSONs:
     --------------------------------------
-    "endpoints": {str(files).replace("'", '"')}
+     {json.dumps({"endpoints": files}, indent=4)}
     --------------------------------------
     Paste it in you 'exporter.json' config file
     ''')

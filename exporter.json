@@ -4,12 +4,15 @@
     "prefix": "anyjson_",
     "data_types_in_name": false,
     "endpoints": [
-        "http://localhost:5000/simple.json", 
-        "http://localhost:5000/sentry_bad.json", 
-        "http://localhost:5000/appmetrics_ok.json", 
-        "http://localhost:5000/appmetrics_bad.json", 
-        "http://localhost:5000/manystrings.json", 
-        "http://localhost:5000/sentry_ok.json"],
+        "http://localhost:5000/simple.json",
+        "http://localhost:5000/sentry_bad.json",
+        "http://localhost:5000/appmetrics_ok.json",
+        "http://localhost:5000/appmetrics_bad.json",
+        "http://localhost:5000/manystrings.json",
+        "http://localhost:5000/invalid_json.json",
+        "http://localhost:5000/list.json",
+        "http://localhost:5000/sentry_ok.json"
+    ],
     "healthy_regex": [
         "[Hh]ealth.*",
         "[Tt]rue",

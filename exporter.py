@@ -60,12 +60,14 @@ class JsonCollector(object):
             metric.add_sample(self._prefix + mtr_d['name'], value=mtr_d['value'], labels=mtr_d['labels'])
             metrics.append(metric)
         if type(t[1]) == list:
+            cnt = 0
             for i in t[1]:
                 l = {"index": str(t[1].index(i))}
-                name = t[0]
+                name = f'{t[0]}_{cnt}'
                 if self._show_type:
                     name += '_list'
                 self.parse((name, i), metrics, endpoint, label=l)
+                cnt += 1
         if type(t[1]) == dict:
             for i in t[1].items():
                 name = t[0]
@@ -82,24 +84,25 @@ class JsonCollector(object):
             metrics = []
             try:
                 response = requests.get(endpoint)
-                metric = Metric('responsecode', '', 'gauge')
-                metric.add_sample(self._prefix + 'responsecode', value=response.status_code, labels={"url": endpoint})
+                metric = Metric('response_code', '', 'gauge')
+                metric.add_sample('response_code', value=response.status_code, labels={"url": endpoint})
                 metrics.append(metric)
                 metric = Metric('scrape_success', '', 'gauge')
-                metric.add_sample(self._prefix + 'scrape_success', value=1, labels={"url": endpoint})
+                metric.add_sample('scrape_success', value=int(response.ok), labels={"url": endpoint})
                 metrics.append(metric)
                 data = response.json()
             except:
                 metric = Metric('scrape_success', '', 'gauge')
-                metric.add_sample(self._prefix + 'scrape_success', value=0, labels={"url": endpoint})
+                metric.add_sample('scrape_success', value=0, labels={"url": endpoint})
                 metrics.append(metric)
             # тут может быть dict или list
             if type(data) == dict:
                 for i in data.items():
                     self.parse(i, metrics, endpoint)
             if type(data) == list:
-                # Сделаю потом
-                pass
+                for elem in data:
+                    for i in elem.items():
+                        self.parse(i, metrics, endpoint)
             # Найти способ получше этих 2х строк...
             for m in metrics:
                 yield m
