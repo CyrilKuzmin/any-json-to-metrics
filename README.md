@@ -1,4 +1,4 @@
-# any-json-to-metrics exporter
+# any-json-to-metrics Prometheus exporter
 This simple exporter parses any (I hope) JSON endpoints. This is only prototype for test environments.
 
 ## Usage
