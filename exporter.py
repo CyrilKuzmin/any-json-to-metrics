@@ -1,118 +1,71 @@
-from prometheus_client import start_http_server, Metric, REGISTRY
 import json
-import requests
-import time
-import re
+import utils
 
+from flask import Flask, request
+from prometheus_client import Metric
+from collector import JsonCollector
 
-class JsonCollector(object):
-    def __init__(self, config):
-        # по сути единственное обязательное поле
-        self._endpoints = config["endpoints"]
-        # все остальное
-        self._healthy_regex = config.get("healthy_regex")
-        self._prefix = config.get("prefix")
-        self._show_type = config.get("data_types_in_name")
+CONFIG = {}
 
-    def parseBaseTuple(self, t: tuple, endpoint, label={}) -> dict:
-        '''
-        Парсим "базовый" элемент типа ключ:значение,
-        где ключ - str, значение - int,float,bool или str
-        '''
-        result = {
-            "name": "",
-            "value": 0,
-            "labels": {"url": endpoint},
-        }
-        # имя метрики формируем как имена всех ключей до значения
-        result["name"] += t[0]
-        # само значение может быть 0, 1 или оно берется из json'ки, зависит от типа
-        if type(t[1]) == (int or float):
-            result["value"] = t[1]
-        elif type(t[1]) == bool:
-            result["value"] = int(t[1])
-        elif type(t[1]) == str:
-            result["labels"]["text"] = t[1]
-            if self._healthy_regex:
-                for r in self._healthy_regex:
-                    if re.match(r, t[1]):
-                        result["value"] = 1
-        else:
-            result["value"] = 0
-        if label:
-            result["labels"].update(label)
-        return result
+app = Flask("any_json_to_metrics")
 
-    def correctMetricName(self, s: str) -> str:
-        return str(s).replace(' ', '_').replace('-','_')
+# Редиректим GET с корня на /metrics 
+@app.route('/', methods=['GET'])
+def redirect():
+    return flask.redirect('/metrics')
 
-    def parse(self, t: tuple, metrics: list, endpoint, label={}) -> list:
-        NoneType = type(None)
-        if type(t[1]) in (int, float, bool, str, NoneType):
-            mtr_d = {}
-            if self._show_type:
-                k = self.correctMetricName(t[0]+'_value')
-            else:
-                k = self.correctMetricName(t[0])
-            v = t[1]
-            mtr_d = self.parseBaseTuple((k, v), endpoint, label=label)
-            metric = Metric(mtr_d['name'], '', 'gauge')
-            metric.add_sample(self._prefix + mtr_d['name'], value=mtr_d['value'], labels=mtr_d['labels'])
-            metrics.append(metric)
-        if type(t[1]) == list:
-            cnt = 0
-            for i in t[1]:
-                l = {"index": str(t[1].index(i))}
-                name = f'{t[0]}_{cnt}'
-                if self._show_type:
-                    name += '_list'
-                self.parse((name, i), metrics, endpoint, label=l)
-                cnt += 1
-        if type(t[1]) == dict:
-            for i in t[1].items():
-                name = t[0]
-                if self._show_type:
-                    name += '_dict_'
+# Prometheus-like обновление конфига. 
+# Не прокатит для порта/интерфейса без рестарта
+@app.route('/-/reload', methods=['POST'])
+def reload():
+    with open('exporter.json', 'r') as file:
+        CONFIG = json.load(file)
+    return "OK"
+
+# Основная часть тут. Коллектим метрики, форматируем вывод.
+# Форматирование взято из prometheus_client с выпиленной документацией 
+# для метрик, ибо в нашем случае это 100% gauge и смысловой нагрузки нет
+@app.route('/metrics', methods=['GET'])
+def collect():
+    output = []
+    # JsonCollector (как того требует prometheus_client) имеет метод collect
+    # который генерирует Metric'и. Эти метрики будут в формате OpenMetrics и их
+    # надо преобразовать в формат прома, что и делается в блоке try
+    # Потом эти метрики в виде готовых строк для прома идут в массив
+    # output, что мы и возвращаем
+    for metric in JsonCollector(CONFIG, request.args.get('target')).collect():
+        try:
+            mname = metric.name
+            mtype = metric.type
+            # Munging from OpenMetrics into Prometheus format.
+            if mtype == 'counter':
+                mname = mname + '_total'
+            elif mtype == 'info':
+                mname = mname + '_info'
+                mtype = 'gauge'
+            elif mtype == 'stateset':
+                mtype = 'gauge'
+            elif mtype == 'gaugehistogram':
+                mtype = 'histogram'
+            elif mtype == 'unknown':
+                mtype = 'untyped'
+            om_samples = {}
+            for s in metric.samples:
+                for suffix in ['_created', '_gsum', '_gcount']:
+                    if s.name == metric.name + suffix:
+                        # OpenMetrics specific sample, put in a gauge at the end.
+                        om_samples.setdefault(suffix, []).append(utils.sample_line(s))
+                        break
                 else:
-                    name += '_'
-                self.parse((name + i[0], i[1]), metrics, endpoint)
-
-    def collect(self):
-        for endpoint in self._endpoints:
-            # Получаем JSON
-            data = {}
-            metrics = []
-            try:
-                response = requests.get(endpoint)
-                metric = Metric('response_code', '', 'gauge')
-                metric.add_sample('response_code', value=response.status_code, labels={"url": endpoint})
-                metrics.append(metric)
-                metric = Metric('scrape_success', '', 'gauge')
-                metric.add_sample('scrape_success', value=int(response.ok), labels={"url": endpoint})
-                metrics.append(metric)
-                data = response.json()
-            except:
-                metric = Metric('scrape_success', '', 'gauge')
-                metric.add_sample('scrape_success', value=0, labels={"url": endpoint})
-                metrics.append(metric)
-            # тут может быть dict или list
-            if type(data) == dict:
-                for i in data.items():
-                    self.parse(i, metrics, endpoint)
-            if type(data) == list:
-                for elem in data:
-                    for i in elem.items():
-                        self.parse(i, metrics, endpoint)
-            # Найти способ получше этих 2х строк...
-            for m in metrics:
-                yield m
-
+                    output.append(utils.sample_line(s))
+        except Exception as exception:
+            exception.args = (exception.args or ('',)) + (metric,)
+            raise
+        for suffix, lines in sorted(om_samples.items()):
+            output.extend(lines)
+    return ''.join(output).encode('utf-8')
 
 if __name__ == '__main__':
-    config = {}
     with open('exporter.json', 'r') as file:
-        config = json.load(file)
-    start_http_server(config["port"], addr=config["bind_address"])
-    REGISTRY.register(JsonCollector(config))
-    while True:
-        time.sleep(1)
+        CONFIG = json.load(file)
+    app.run(host=CONFIG["bind_address"], port=CONFIG["port"])
