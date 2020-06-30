@@ -2,6 +2,8 @@
 This simple exporter parses any (I hope) JSON endpoints.
 
 ## Usage
+
+### Configuration and running
 All options should be set in 'exporter.json' file. There are only few options:
 | Option | Type | Comment |
 | ------ | ---- | ------- |
@@ -9,7 +11,6 @@ All options should be set in 'exporter.json' file. There are only few options:
 | port | int | TCP port (default: "9900") |
 | prefix | string | (optional, default: "anyjson_") You can specify a prefix for all exporter's metrics (Prometheus "\_\_name\_\_") |
 | data_types_in_name | bool | (optional, default: false) If "true" you will get types of elements in "\_\_name\_\_" | 
-| endpoints | list of strings | Set all your endpoints |
 | healthy_regex | list of strings | (optional) By default if the value of some JSON element is string, its metrics value will be 0. You can set regex to check these strings and value will set to 1 if string matches at least one regex. Compare anyjson_f and anyjson_f_state in the 1st example below. | 
 
 Then just run it:
@@ -21,6 +22,53 @@ or use Docker:
 docker build -t any-json-to-metrics .
 docker run -d -p 9900:9900 -v /path/to/exporter.json:/app/exporter.json any-json-to-metrics
 ```
+
+### Prometheus config
+The sample config:
+```
+global:
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    evaluation_interval: 15s
+scrape_configs:
+  - job_name: "any-json"
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - http://localhost:5000/appmetrics_bad.json
+          - http://localhost:5000/appmetrics_ok.json
+          - http://localhost:5000/invalid_json.json
+          - http://localhost:5000/list.json
+          - http://localhost:5000/manystrings.json
+          - http://localhost:5000/rfc.json
+          - http://localhost:5000/sentry_bad.json
+          - http://localhost:5000/sentry_ok.json
+          - http://localhost:5000/simple.json
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:9900
+```
+You must specify all endpoints as targets and apply relabel config.
+IMHO it's the best way to maintain a relevant config and list of all endpoints.
+
+Run prometheus for tests:
+```
+sudo docker run -d \
+    -p 9090:9090 \
+    --network="host" \
+    -v /tmp/prometheus_sample.yml:/etc/prometheus/prometheus.yml \
+    prom/prometheus
+```
+### Test server
+```
+cd tests
+python test_server.py
+```
+It just looks for json files in the directory and returns them.
 
 ## Examples
 Input:
@@ -81,3 +129,5 @@ anyjson_healthy_service_two{job="any-json-to-metrics",text="OK. 'http://service-
 anyjson_healthy_service_scheduler{job="any-json-to-metrics",text="OK. 'http://scheduler/health' success. Total Time taken: 2ms. Attempts: 1.",url="http://localhost:5000/appmetrics_ok.json"}	1
 anyjson_status{job="any-json-to-metrics",text="Healthy",url="http://localhost:5000/appmetrics_ok.json"}	1
 ```
+
+

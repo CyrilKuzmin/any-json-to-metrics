@@ -1,0 +1,25 @@
+global:
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    evaluation_interval: 15s
+scrape_configs:
+  - job_name: "any-json"
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - http://localhost:5000/appmetrics_bad.json
+          - http://localhost:5000/appmetrics_ok.json
+          - http://localhost:5000/invalid_json.json
+          - http://localhost:5000/list.json
+          - http://localhost:5000/manystrings.json
+          - http://localhost:5000/rfc.json
+          - http://localhost:5000/sentry_bad.json
+          - http://localhost:5000/sentry_ok.json
+          - http://localhost:5000/simple.json
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:9900

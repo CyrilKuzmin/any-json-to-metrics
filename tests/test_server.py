@@ -18,12 +18,15 @@ if __name__ == '__main__':
     for file in os.listdir("."):
         if file.endswith(".json"):
             files.append(os.path.join("http://localhost:5000/", file))
+    files_text = []
+    for f in files:
+        files_text.append(f"\t- {f}\n")
     print(f'''
     Test server for any-json-to-metrics exporter
     I've found these JSONs:
     --------------------------------------
-     {json.dumps({"endpoints": files}, indent=4)}
+     {" ".join(str(x) for x in files_text)}
     --------------------------------------
-    Paste it in you 'exporter.json' config file
+    Put them into your 'prometheus.yml' file
     ''')
     app.run(host="0.0.0.0")
