@@ -11,7 +11,7 @@ app = Flask("any_json_to_metrics")
 
 # Редиректим GET с корня на /metrics 
 @app.route('/', methods=['GET'])
-def redirect():
+def redirect_to_metrics():
     return redirect('/metrics')
 
 # Prometheus-like обновление конфига. 
