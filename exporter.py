@@ -27,6 +27,8 @@ def reload():
 # для метрик, ибо в нашем случае это 100% gauge и смысловой нагрузки нет
 @app.route('/metrics', methods=['GET'])
 def collect():
+    if not request.args.get('target'):
+        return 'No target'
     output = []
     # JsonCollector (как того требует prometheus_client) имеет метод collect
     # который генерирует Metric'и. Эти метрики будут в формате OpenMetrics и их
