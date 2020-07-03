@@ -1,7 +1,7 @@
 import json
 import utils
 
-from flask import Flask, request
+from flask import Flask, request, redirect
 from prometheus_client import Metric
 from collector import JsonCollector
 
@@ -12,7 +12,7 @@ app = Flask("any_json_to_metrics")
 # Редиректим GET с корня на /metrics 
 @app.route('/', methods=['GET'])
 def redirect():
-    return flask.redirect('/metrics')
+    return redirect('/metrics')
 
 # Prometheus-like обновление конфига. 
 # Не прокатит для порта/интерфейса без рестарта
