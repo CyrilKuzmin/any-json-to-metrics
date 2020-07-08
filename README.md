@@ -65,7 +65,7 @@ sudo docker run -d \
 ```
 ### Grafana dashboard example
 ![Grafana dashboard example]
-(https://github.com/xxlaefxx/yaktocat.png)
+(https://github.com/xxlaefxx/any-json-to-metrics/raw/master/grafana70_example.png)
 ### Test server
 ```
 cd tests
