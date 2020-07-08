@@ -20,7 +20,7 @@ python exporter.py
 or use Docker:
 ```
 docker build -t any-json-to-metrics .
-docker run -d -p 9900:9900 -v /path/to/exporter.json:/app/exporter.json any-json-to-metrics
+docker run -d -p 9900:9900 -v /path/to/exporter.json:/app/exporter.json -name any-json-to-metrics any-json-to-metrics
 ```
 
 ### Prometheus config
@@ -63,6 +63,9 @@ sudo docker run -d \
     -v /tmp/prometheus_sample.yml:/etc/prometheus/prometheus.yml \
     prom/prometheus
 ```
+### Grafana dashboard example
+![Grafana dashboard example]
+(https://github.com/xxlaefxx/yaktocat.png)
 ### Test server
 ```
 cd tests
