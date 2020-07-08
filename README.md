@@ -64,8 +64,7 @@ sudo docker run -d \
     prom/prometheus
 ```
 ### Grafana dashboard example
-![Grafana dashboard example]
-(https://github.com/xxlaefxx/any-json-to-metrics/raw/master/grafana70_example.png)
+![Grafana dashboard example](/grafana70_example.png?raw=true "Grafana dashboard example")
 ### Test server
 ```
 cd tests
