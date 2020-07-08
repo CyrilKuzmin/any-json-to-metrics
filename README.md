@@ -4,7 +4,7 @@ This simple exporter parses any (I hope) JSON endpoints.
 ## Usage
 
 ### Configuration and running
-All options should be set in 'exporter.json' file. There are only few options:
+All options should be set in 'config.json' file. There are only few options:
 | Option | Type | Comment |
 | ------ | ---- | ------- |
 | bind_address | string | Interface address (default: "0.0.0.0") |
@@ -20,7 +20,7 @@ python exporter.py
 or use Docker:
 ```
 docker build -t any-json-to-metrics .
-docker run -d -p 9900:9900 -v /path/to/exporter.json:/app/exporter.json -name any-json-to-metrics any-json-to-metrics
+docker run -d -p 9900:9900 -v /path/to/config.json:/app/config.json -name any-json-to-metrics any-json-to-metrics
 ```
 
 ### Prometheus config

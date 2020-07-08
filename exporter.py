@@ -18,7 +18,7 @@ def redirect_to_metrics():
 # Не прокатит для порта/интерфейса без рестарта
 @app.route('/-/reload', methods=['POST'])
 def reload():
-    with open('exporter.json', 'r') as file:
+    with open('config.json', 'r') as file:
         CONFIG = json.load(file)
     return "OK"
 
@@ -68,6 +68,6 @@ def collect():
     return ''.join(output).encode('utf-8')
 
 if __name__ == '__main__':
-    with open('exporter.json', 'r') as file:
+    with open('config.json', 'r') as file:
         CONFIG = json.load(file)
     app.run(host=CONFIG["bind_address"], port=CONFIG["port"])
