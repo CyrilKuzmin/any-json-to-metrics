@@ -1,4 +1,25 @@
 {
+  "__inputs": [],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "7.0.4"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -15,8 +36,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
-  "iteration": 1594215885199,
+  "id": null,
+  "iteration": 1594215885200,
   "links": [],
   "panels": [
     {
@@ -332,14 +353,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "tags": [],
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
-        },
+        "current": {},
         "datasource": "$DS",
         "definition": "label_values(scrape_success,url)",
         "hide": 0,
@@ -380,5 +394,6 @@
   },
   "timezone": "",
   "title": "Any JSON To Metrics",
+  "uid": "qVZgWlGGz",
   "version": 2
 }
