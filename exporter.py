@@ -1,4 +1,6 @@
+import argparse
 import json
+import logging
 import utils
 
 from flask import Flask, request, redirect
@@ -8,6 +10,22 @@ from collector import JsonCollector
 CONFIG = {}
 
 app = Flask("any_json_to_metrics")
+
+def init_logger():
+    parser = argparse.ArgumentParser(description='any-json-to-metrics exporter')
+    parser.add_argument("-log", "--log_level", help="set logger level (DEBUG, INFO, WARNING, ERROR). Default is INFO")
+    args = parser.parse_args()
+    if args.log_level is None:
+        return
+    # Валидируем введенный уровень
+    numeric_level = getattr(logging, args.log_level.upper(), None)
+    if not isinstance(numeric_level, int):
+        print('Invalid log level: %s' % args.log_level)
+        exit(1)
+    # Устанавливаем уровень
+    logging.basicConfig(level=numeric_level)
+    logw = logging.getLogger('werkzeug')
+    logw.setLevel(numeric_level)
 
 # Редиректим GET с корня на /metrics 
 @app.route('/', methods=['GET'])
@@ -68,6 +86,7 @@ def collect():
     return ''.join(output).encode('utf-8')
 
 if __name__ == '__main__':
+    init_logger()
     with open('config.json', 'r') as file:
         CONFIG = json.load(file)
     app.run(host=CONFIG["bind_address"], port=CONFIG["port"])
